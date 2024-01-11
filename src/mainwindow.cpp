@@ -120,6 +120,43 @@ void MainWindow::updateFileInfo()
     setWindowTitle(windowTitle);
 }
 
+bool MainWindow::loadFile(QString filePath)
+{
+    currentFile.setFileName(filePath);
+
+    bool success = false;
+    if (filePath.endsWith(".psf") || filePath.endsWith(".psfu")) {
+        fileType = FileType::PSF;
+        success = font.loadFromFile(filePath.toStdString().c_str());
+    }
+    else if (filePath.endsWith(".mif")) {
+        DlgSymbInfo *dlg = new DlgSymbInfo(this);
+        if (dlg->exec() != QDialog::Accepted) {
+            return false;
+        }
+        int gw = dlg->getWidth();
+        int gh = dlg->getHeight();
+        dlg->deleteLater();
+
+        fileType = FileType::MIF;
+        success = PSF::loadFromVerilogMif(font, gw, gh, filePath.toStdString());
+    }
+    else {
+        QMessageBox::information(this, "Error", "Unrecognized file format: '" + filePath + "'");
+        return false;
+    }
+
+    if (!success) {
+        QMessageBox::information(this, "Error", "Error loading file '" + filePath + "'");
+        return false;
+    }
+
+    ui->widgetGlyphEditor->setFont(&font);
+    updateGlyphListWidget();
+    return true;
+}
+
+
 void MainWindow::on_actionOpenFontFile_triggered()
 {
     QFileDialog::Options options;
@@ -141,34 +178,7 @@ void MainWindow::on_actionOpenFontFile_triggered()
     }
     currentFile.setFileName(filePath);
 
-    bool success = false;
-    if (filePath.endsWith(".psf") || filePath.endsWith(".psfu")) {
-        fileType = FileType::PSF;
-        success = font.loadFromFile(filePath.toStdString().c_str());
-    }
-    else if (filePath.endsWith(".mif")) {
-        DlgSymbInfo *dlg = new DlgSymbInfo(this);
-        if (dlg->exec() != QDialog::Accepted) {
-            return;
-        }
-        int gw = dlg->getWidth();
-        int gh = dlg->getHeight();
-        dlg->deleteLater();
-
-        fileType = FileType::MIF;
-        success = PSF::loadFromVerilogMif(font, gw, gh, filePath.toStdString());
-    }
-    else {
-        QMessageBox::information(this, "Error", "Unrecognized file format: '" + filePath + "'");
-        return;
-    }
-
-    if (!success) {
-        QMessageBox::information(this, "Error", "Error loading file '" + filePath + "'");
-        return;
-    }
-    ui->widgetGlyphEditor->setFont(&font);
-    updateGlyphListWidget();
+    loadFile(filePath);
 }
 
 void MainWindow::on_actionSaveFont_triggered()

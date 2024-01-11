@@ -20,6 +20,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    bool loadFile(QString filePath);
 
 private slots:
     void on_actionExitApp_triggered();
