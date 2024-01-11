@@ -7,6 +7,12 @@
 #include <QMouseEvent>
 #include "psf.h"
 
+enum class DrawingMode {
+    CLEARING = 0,
+    SETTING = 1,
+    FLIPPING = 2
+};
+
 /*
  * One glyph pixel will be zoomed to 24x24 pixels on the editor
  */
@@ -81,6 +87,8 @@ private:
     void drawGlyph(QPainter &painter);
     bool findPointInCanvas(const QPoint& pt, QPoint &cpt);
     void flipGlyphPoint(const QPoint& gpt);
+    void setGlyphPoint(const QPoint& gpt);
+    void clearGlyphPoint(const QPoint& gpt);
 
 protected:
     void paintEvent(QPaintEvent *e);
@@ -99,6 +107,7 @@ private:
     int dot_width, dot_height;
     QPoint prev_sel_point;
     bool drag_started;
+    DrawingMode drawing_mode;
     bool editor_enabled;
     bool glyph_edited;
     PSFFont *font;
