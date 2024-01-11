@@ -34,7 +34,8 @@ SOURCES += src/main.cpp\
     src/qglyphlistwidgetitemdelegate.cpp \
     src/psfutil.cpp \
     src/psf.cpp \
-    src/dlgsymbinfo.cpp
+    src/dlgsymbinfo.cpp \
+    src/codepoints.cpp
 
 HEADERS  += include/mainwindow.h \
     include/qfontglypheditor.h \
@@ -42,7 +43,8 @@ HEADERS  += include/mainwindow.h \
     include/psfutil.h \
     include/psf.h \
     include/mini_utf8.h \
-    include/dlgsymbinfo.h
+    include/dlgsymbinfo.h \
+    include/codepoints.h
 
 FORMS    += ui/mainwindow.ui \
     ui/dlgsymbinfo.ui

@@ -10,6 +10,7 @@
 #include "qglyphlistwidgetitemdelegate.h"
 #include "dlgsymbinfo.h"
 #include "psfutil.h"
+#include "codepoints.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -89,6 +90,7 @@ void MainWindow::on_listFontGlyphs_itemSelectionChanged()
             }
         }
         QString lblText = "Current symbol <b>" + QString::number(index);
+        lblText += " (" + QString(getCodepointName(index)) + ")";
         if (s != "") { lblText += " : " + s; }
         lblText += "</b>";
 
@@ -131,23 +133,20 @@ void MainWindow::on_actionOpenFontFile_triggered()
     QString filePath = QFileDialog::getOpenFileName(this,
                                  tr("Open Font file"),
                                  currFilePath,
-                                 tr("Verilog MIF (*.mif);;PSF file (*.psf)"),
+                                 tr("MIF or PSF file (*.mif *.psf *.psfu)"),
                                  &selectedFilter,
                                  options);
     if (filePath.isEmpty()) {
         return;
     }
-    if (selectedFilter.isEmpty()) {
-        QMessageBox::information(this, "Error", "Unknown file '" + filePath + "'. Please select a MIF or PSF file");
-        return;
-    }
     currentFile.setFileName(filePath);
 
-    bool success;
-    if (selectedFilter.contains("PSF")) {
+    bool success = false;
+    if (filePath.endsWith(".psf") || filePath.endsWith(".psfu")) {
         fileType = FileType::PSF;
         success = font.loadFromFile(filePath.toStdString().c_str());
-    } else {
+    }
+    else if (filePath.endsWith(".mif")) {
         DlgSymbInfo *dlg = new DlgSymbInfo(this);
         if (dlg->exec() != QDialog::Accepted) {
             return;
@@ -158,6 +157,10 @@ void MainWindow::on_actionOpenFontFile_triggered()
 
         fileType = FileType::MIF;
         success = PSF::loadFromVerilogMif(font, gw, gh, filePath.toStdString());
+    }
+    else {
+        QMessageBox::information(this, "Error", "Unrecognized file format: '" + filePath + "'");
+        return;
     }
 
     if (!success) {
